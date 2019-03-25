@@ -1,0 +1,17 @@
+{
+    "name": "mireagepresent/restodo",
+    "description": "REST API for todo list",
+    "type": "project",
+    "require": {
+        "firebase/php-jwt": "^5.0",
+        "vlucas/phpdotenv": "^3.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Davyd Holovii",
+            "email": "mirage.present@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}

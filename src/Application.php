@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Exception\HttpExceptionInterface;
+use App\Http\Response;
 use App\Http\Router;
 
 /**
@@ -36,6 +38,13 @@ class Application
      */
     public function run(): void
     {
-        echo "Application result";
+        try {
+            $response = $this->router->handle();
+        } catch (HttpExceptionInterface $e) {
+            // create 404 response
+            $response = new Response();
+        }
+
+        echo "Response result";
     }
 }

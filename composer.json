@@ -13,5 +13,10 @@
             "email": "mirage.present@gmail.com"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src"
+        }
+    },
     "minimum-stability": "stable"
 }

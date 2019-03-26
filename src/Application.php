@@ -41,9 +41,11 @@ class Application
         try {
             $response = $this->router->handle();
         } catch (HttpExceptionInterface $e) {
-            // create 404 response
+            // create 4** response
             $response = new Response();
             $response->setStatusCode($e->getCode());
+            $response->setBody(json_encode(["error" => $e->getMessage()]));
+            $response->addHeaders(["Content-Type" => "application/json"]);
         }
 
         $response->send();

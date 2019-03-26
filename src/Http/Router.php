@@ -29,27 +29,28 @@ class Router
      * @var array
      */
     private $routes = [
-        "/singup" => [
+        [
+            "path" => "/singup",
             "method" => Request::METHOD_POST,
             "controller" => AuthController::class,
             "action" => "register",
-        ],
-        "/singin" => [
+        ], [
+            "path" => "/singin",
             "method" => Request::METHOD_POST,
             "controller" => AuthController::class,
             "action" => "login",
-        ],
-        "/tasks" => [
+        ], [
+            "path" => "/tasks",
             "method" => Request::METHOD_POST,
             "controller" => TaskController::class,
             "action" => "create",
-        ],
-        "/tasks/{id}/done" => [
+        ], [
+            "path" => "/tasks/{id}/done",
             "method" => Request::METHOD_PATCH,
             "controller" => TaskController::class,
             "action" => "done",
-        ],
-        "/tasks/{id}" => [
+        ],[
+            "path" => "/tasks/{id}",
             "method" => Request::METHOD_DELETE,
             "controller" => TaskController::class,
             "action" => "delete",
@@ -143,14 +144,14 @@ class Router
         $detected = null;
         $requestItems = explode("/", $this->request->getUri()->getPath());
 
-        foreach ($this->routes as $routeUri => $route) {
+        foreach ($this->routes as $route) {
             if ($route["method"] !== $this->request->getMethod()) {
                 continue;
             }
 
             $attributes = [];
 
-            $routeItems = explode("/", $routeUri);
+            $routeItems = explode("/", $route["path"]);
 
             if (count($requestItems) !== count($routeItems)) {
                 continue;

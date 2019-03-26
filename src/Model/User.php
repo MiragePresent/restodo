@@ -73,6 +73,16 @@ class User
     }
 
     /**
+     * Checks user's credentials
+     *
+     * @return bool
+     */
+    public function validCredentials()
+    {
+        return (bool) count($this->findBy(["email" => $this->email, "password" => $this->password]));
+    }
+
+    /**
      * @param string $pass
      *
      * @return User
@@ -80,6 +90,43 @@ class User
     public function createPassword(string $pass): self
     {
         $this->password = $this->hash($pass);
+
+        return $this;
+    }
+
+    public function load(): self
+    {
+        $query = "select * from users where 1";
+        $input = [];
+
+        if ($this->id) {
+            $query .= " and id = ?";
+            $input[] = $this->id;
+        }
+
+        if ($this->password) {
+            $query .= " and password = ?";
+            $input[] = $this->password;
+        }
+
+        if ($this->email) {
+            $query .= " and email = ?";
+            $input[] = $this->email;
+        }
+
+        $query .= " limit 2";
+
+        $all = DB::execute($query, $input);
+
+        if (count($all) !== 1) {
+            throw new \Exception("Cannot load user. There were found " . count($all) ." record");
+        }
+
+        foreach (current($all) as $field => $value) {
+            if (!$this->{$field}) {
+                $this->{$field} = $value;
+            }
+        }
 
         return $this;
     }

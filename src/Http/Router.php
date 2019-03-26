@@ -136,6 +136,10 @@ class Router
         $requestItems = explode("/", $this->request->getUri()->getPath());
 
         foreach ($this->routes as $routeUri => $route) {
+            if ($route["method"] !== $this->request->getMethod()) {
+                continue;
+            }
+
             $attributes = [];
 
             $routeItems = explode("/", $routeUri);
@@ -148,7 +152,7 @@ class Router
                 if (preg_match("/^{(?<attr>[a-zA-Z_]+)}$/", $routeItems[$i], $matches)) {
                     $attributes[$matches["attr"]] = $requestItems[$i];
                 } elseif ($requestItems[$i] !== $routeItems[$i]) {
-                    continue;
+                    continue 2;
                 }
             }
 

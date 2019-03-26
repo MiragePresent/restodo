@@ -2,6 +2,8 @@
 
 namespace App\Tool;
 
+use App\DB;
+
 /**
  * Class FieldValidator
  *
@@ -140,6 +142,50 @@ class FieldValidator
             if (!filter_var($this->value, FILTER_VALIDATE_EMAIL)) {
                 $this->valid = false;
                 $this->error = "The {$this->field} must be a valid email address.";
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Checks if value is unique in DB
+     *
+     * @param string $table
+     * @param string $column
+     *
+     * @return $this
+     */
+    public function unique(string $table, string $column): self
+    {
+        if ($this->valid) {
+            $query = "select {$column} from {$table} where {$column} = ? limit 1";
+
+            if (count(DB::execute($query, [$this->value]))) {
+                $this->valid = false;
+                $this->error = "The {$this->field} has already been taken.";
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Checks if value exists in table
+     *
+     * @param string $table
+     * @param string $column
+     *
+     * @return $this
+     */
+    public function exists(string $table, string $column): self
+    {
+        if ($this->valid) {
+            $query = "select {$column} from {$table} where {$column} = ? limit 1";
+
+            if (!count(DB::execute($query, [$this->value]))) {
+                $this->valid = false;
+                $this->error = "The provided {$this->field} is invalid.";
             }
         }
 

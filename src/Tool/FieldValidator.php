@@ -161,7 +161,7 @@ class FieldValidator
         if ($this->valid) {
             $query = "select {$column} from {$table} where {$column} = ? limit 1";
 
-            if (count(DB::execute($query, [$this->value]))) {
+            if (!empty(DB::execute($query, [$this->value]))) {
                 $this->valid = false;
                 $this->error = "The {$this->field} has already been taken.";
             }

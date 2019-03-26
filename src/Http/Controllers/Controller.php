@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Request;
+use App\Http\Response;
+use App\Tool\FieldValidator;
+use \InvalidArgumentException;
 
 /**
  * Class Controller
@@ -20,12 +23,38 @@ class Controller
     protected $request;
 
     /**
-     * Set request instance
+     * @var Response
+     */
+    protected $response;
+
+    /**
+     * Controller constructor.
      *
      * @param Request $request
      */
-    public function setRequest(Request $request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
+        $this->response = new Response();
+    }
+
+    /**
+     * @param FieldValidator[] ...$fields
+     *
+     * @return array
+     */
+    protected function getErrors(...$fields): array
+    {
+        $errors = [];
+
+        foreach ($fields as $field) {
+            if (!$field instanceof FieldValidator) {
+                throw new InvalidArgumentException("Field item must bu instance of FieldValidator");
+            }
+
+            $errors[$field->getName()] = $field->getError();
+        }
+
+        return $errors;
     }
 }

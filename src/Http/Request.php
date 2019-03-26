@@ -12,12 +12,54 @@ use GuzzleHttp\Psr7\Request as PsrRequest;
 class Request extends PsrRequest
 {
     /**
+     * Http method OPTIONS
+     *
+     * @var string
+     */
+    public const METHOD_OPTIONS = "OPTIONS";
+
+    /**
+     * Http method GET
+     *
+     * @var string
+     */
+    public const METHOD_GET = "GET";
+
+    /**
+     * Http method POST
+     *
+     * @var string
+     */
+    public const METHOD_POST = "POST";
+
+    /**
+     * Http method PATCH
+     *
+     * @var string
+     */
+    public const METHOD_PATCH = "PATCH";
+
+    /**
+     * Http method DELETE
+     *
+     * @var string
+     */
+    public const METHOD_DELETE = "DELETE";
+
+    /**
      * Route settings
      * [method => ..., controller => ..., action => ..., attributes => ...]
      *
      * @var array
      */
     protected $routeSettings;
+
+    /**
+     * Passed request JSON
+     *
+     * @var array
+     */
+    protected $parsedJson;
 
     /**
      * Set route settings of request
@@ -47,5 +89,37 @@ class Request extends PsrRequest
         }
 
         return $this->routeSettings;
+    }
+
+    /**
+     * Whether is JSON request
+     *
+     * @return bool
+     */
+    public function isJson(): bool
+    {
+        $contentType = current($this->getHeader("Content-Type"));
+
+        return $contentType && false !== strpos($contentType, 'json');
+    }
+
+    /**
+     * Returns request input
+     *
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function get(string $name)
+    {
+        if ($this->isJson()) {
+            if (!$this->parsedJson) {
+                $this->parsedJson = json_decode($this->getBody()->getContents(), true);
+            }
+
+            return $this->parsedJson[$name] ?? null;
+        }
+
+        return null;
     }
 }

@@ -43,8 +43,12 @@ class Application
         } catch (HttpExceptionInterface $e) {
             // create 404 response
             $response = new Response();
+            $response->setStatusCode(404);
+
+            var_dump($e);
+            die;
         }
 
-        echo "Response result";
+        $response->send();
     }
 }

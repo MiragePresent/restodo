@@ -16,34 +16,6 @@ use App\Http\Controllers\Controller;
 class Router
 {
     /**
-     * Http method GET
-     *
-     * @var string
-     */
-    public const METHOD_GET = "GET";
-
-    /**
-     * Http method POST
-     *
-     * @var string
-     */
-    public const METHOD_POST = "POST";
-
-    /**
-     * Http method PATCH
-     *
-     * @var string
-     */
-    public const METHOD_PATCH = "PATCH";
-
-    /**
-     * Http method DELETE
-     *
-     * @var string
-     */
-    public const METHOD_DELETE = "DELETE";
-
-    /**
      * Http request
      *
      * @var Request
@@ -56,21 +28,22 @@ class Router
      * @var array
      */
     private $routes = [
+        "/singup" => [
+            "method" => Request::METHOD_POST,
+            "controller" => AuthController::class,
+            "action" => "register",
+        ],
         "/singin" => [
-            "method" => self::METHOD_GET,
+            "method" => Request::METHOD_POST,
             "controller" => AuthController::class,
             "action" => "login",
         ],
-        "/singup" => [
-            "method" => self::METHOD_POST,
-            "uses" => "AuthController@register",
-        ],
         "/singout" => [
-            "method" => self::METHOD_GET,
+            "method" => Request::METHOD_GET,
             "uses" => "AuthController@logout",
         ],
         "/users/{user_id}/tasks/{task_id}" => [
-            "method" => self::METHOD_GET,
+            "method" => Request::METHOD_GET,
             "controller" => "",
         ],
     ];
@@ -114,14 +87,11 @@ class Router
      *
      * @return Controller
      */
-    public function getController(): Controller
+    private function getController(): Controller
     {
         $className = $this->request->getRouteSettings('controller');
-        /** @var Controller $controller */
-        $controller = new $className();
-        $controller->setRequest($this->request);
 
-        return $controller;
+        return new $className($this->request);
     }
 
     /**

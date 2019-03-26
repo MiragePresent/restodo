@@ -47,6 +47,13 @@ class Request extends PsrRequest
     public const METHOD_DELETE = "DELETE";
 
     /**
+     * Authentication handler
+     *
+     * @var Auth
+     */
+    public $auth;
+
+    /**
      * Route settings
      * [method => ..., controller => ..., action => ..., attributes => ...]
      *
@@ -60,6 +67,13 @@ class Request extends PsrRequest
      * @var array
      */
     protected $parsedJson;
+
+    public function __construct(string $method, $uri, array $headers = [], $body = null, string $version = '1.1')
+    {
+        parent::__construct($method, $uri, $headers, $body, $version);
+
+        $this->auth = new Auth($this);
+    }
 
     /**
      * Set route settings of request

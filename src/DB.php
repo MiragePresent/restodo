@@ -30,7 +30,7 @@ class DB
             "mysql:host={$dbHost};dbname={$dbName}",
             $username,
             $password,
-            [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'"]
+            [PDO::MYSQL_ATTR_INIT_COMMAND => "SET time_zone = '+00:00';"]
         );
 
         $this->PDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -89,7 +89,7 @@ class DB
             if ($query->execute($input)) {
                 if ($rowId = static::$db->PDO->lastInsertId()) {
                     $result = $rowId;
-                } elseif ($query->rowCount()) {
+                } elseif ($query->rowCount() && false !== strpos($query->queryString, "select")) {
                     $result = $query->fetchAll(PDO::FETCH_NAMED);
                 } else {
                     $result = $query->rowCount();

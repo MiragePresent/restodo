@@ -5,18 +5,19 @@ namespace App\Model;
 use App\DB;
 use DateInterval;
 use DateTime;
+use DateTimeZone;
 
 /**
  * Class User
  *
  * @author Davyd Holovii <mirage.present@gmail.com>
  * @since  26.03.2019
+ *
+ * @method User load()
  */
 class User extends Model
 {
     public const TABLE = 'users';
-
-    public $id;
 
     public $email;
 
@@ -25,7 +26,8 @@ class User extends Model
     public function getToken(): string
     {
         $token = bin2hex(random_bytes(120));
-        $expireAt = (new DateTime())->add(new DateInterval("PT2H"));
+        $expireAt = (new DateTime('now', new DateTimeZone('UTC')))
+            ->add(new DateInterval("PT2H"));
 
         DB::execute("delete from user_tokens where user_id = ? and expire_at >= now()", [$this->id]);
 

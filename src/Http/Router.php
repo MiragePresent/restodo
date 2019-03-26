@@ -6,6 +6,7 @@ use App\Exception\BadRequestException;
 use App\Exception\NotFoundException;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\TaskController;
 
 /**
  * Class Router
@@ -38,13 +39,20 @@ class Router
             "controller" => AuthController::class,
             "action" => "login",
         ],
-        "/singout" => [
-            "method" => Request::METHOD_GET,
-            "uses" => "AuthController@logout",
+        "/tasks" => [
+            "method" => Request::METHOD_POST,
+            "controller" => TaskController::class,
+            "action" => "create",
         ],
-        "/users/{user_id}/tasks/{task_id}" => [
-            "method" => Request::METHOD_GET,
-            "controller" => "",
+        "/tasks/{id}/done" => [
+            "method" => Request::METHOD_PATCH,
+            "controller" => TaskController::class,
+            "action" => "done",
+        ],
+        "/tasks/{id}" => [
+            "method" => Request::METHOD_DELETE,
+            "controller" => TaskController::class,
+            "action" => "delete",
         ],
     ];
 
@@ -78,7 +86,7 @@ class Router
         $attributes = $this->request->getRouteSettings('attributes');
         $action = $this->request->getRouteSettings('action');
 
-        return $controller->{$action}(...$attributes);
+        return $controller->{$action}(...array_values($attributes));
     }
 
 

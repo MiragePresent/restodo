@@ -193,6 +193,44 @@ class FieldValidator
     }
 
     /**
+     * Checks enum value
+     *
+     * @param array $allowed
+     *
+     * @return $this
+     */
+    public function in(array $allowed): self
+    {
+        if ($this->valid) {
+            if (!in_array($this->value, $allowed)) {
+                $this->valid = false;
+                $this->error = "The provided {$this->field} is invalid.";
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Checks date format
+     *
+     * @return FieldValidator
+     */
+    public function isDate(): self
+    {
+        if ($this->valid) {
+            $date = explode("-", $this->value);
+
+            if (!checkdate($date[1] ?? '', $date[2] ?? '', $date[0] ?? '')) {
+                $this->valid = false;
+                $this->error = "The {$this->field} must be date in format yyyy-mm-dd";
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Convert to string
      *
      * @return string

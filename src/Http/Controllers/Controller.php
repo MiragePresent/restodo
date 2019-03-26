@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exception\AuthorizationException;
 use App\Http\Request;
 use App\Http\Response;
 use App\Tool\FieldValidator;
@@ -52,9 +53,18 @@ class Controller
                 throw new InvalidArgumentException("Field item must bu instance of FieldValidator");
             }
 
-            $errors[$field->getName()] = $field->getError();
+            if (!$field->isValid()) {
+                $errors[$field->getName()] = $field->getError();
+            }
         }
 
         return $errors;
+    }
+
+    protected function requireAuth(): void
+    {
+        if (!$this->request->auth->isAuthenticated()) {
+            throw new AuthorizationException("User is not authorized");
+        }
     }
 }

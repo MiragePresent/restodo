@@ -30,3 +30,31 @@ if (!function_exists('env')) {
         return $variables->offsetExists($name) ? $variables->get($name) : $default;
     }
 }
+
+if (!function_exists("url")) {
+    function url(string $path): string {
+        return sprintf("http://%s%s", env("BASE_URL", "localhost"), $path);
+    }
+}
+
+if (!function_exists("decamelize")) {
+    function decamelize(string $input): string {
+        preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $input, $matches);
+        $ret = $matches[0];
+
+        foreach ($ret as &$match) {
+            $match = $match == strtoupper($match) ? strtolower($match) : lcfirst($match);
+        }
+
+        return implode('_', $ret);
+    }
+}
+
+if (!function_exists("camelize")) {
+    function camelize(string $input): string {
+        $str = str_replace(' ', '', ucwords(str_replace('_', ' ', $input)));
+        $str[0] = strtolower($str[0]);
+
+        return $str;
+    }
+}

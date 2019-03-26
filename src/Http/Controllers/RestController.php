@@ -72,6 +72,6 @@ class RestController extends Controller
     protected function success(array $data, int $code = 200): Response
     {
         return $this->response->setStatusCode($code)
-            ->setBody(json_encode($data));
+            ->setBody(!empty($data) ? json_encode($data) : "");
     }
 }

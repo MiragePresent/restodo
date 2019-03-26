@@ -17,7 +17,9 @@ class Model
      *
      * @var string
      */
-    public const TABLE = "";
+    public const TABLE = "not_provided_table";
+
+    public $id;
 
     /**
      * Create entity
@@ -31,7 +33,7 @@ class Model
         $query = sprintf(
             "insert into %s (%s) values (%s)",
             static::TABLE,
-            implode(", ", array_keys($fields)),
+            implode(", ", array_map("decamelize", array_keys($fields))),
             implode(", ", array_fill(0, count($fields), "?"))
         );
 
@@ -42,6 +44,36 @@ class Model
         }
 
         $this->id = DB::execute($query, $data);
+
+        return $this;
+    }
+
+    /**
+     * Create entity
+     *
+     * @return Model
+     */
+    public function save(): self
+    {
+        $fields = get_object_vars($this);
+
+        $values = "";
+
+        foreach (array_keys($fields) as $field) {
+            $values .= ($values ? "," : "") . sprintf(" %s = ?", decamelize($field));
+        }
+
+        $query = sprintf("update %s set {$values} where id = ?", static::TABLE);
+
+        $data = [];
+
+        foreach ($fields as $field => $value) {
+            $data[] = $value;
+        }
+
+        $data[] = $this->id;
+
+        DB::execute($query, $data);
 
         return $this;
     }
@@ -81,6 +113,13 @@ class Model
         return $this;
     }
 
+    public function delete(): bool
+    {
+        $query = sprintf("delete from %s where id = ?", static::TABLE);
+
+        return (bool) DB::execute($query, [$this->id]);
+    }
+
     /**
      * @param array $fields
      *
@@ -107,8 +146,12 @@ class Model
             foreach ($rows as $data) {
                 $entity = new static();
 
-                foreach (get_class_vars(static::class) as $field) {
-                    $entity->{$field} = $data[$field] ?? null;
+                foreach ($data as $field => $value) {
+                    $camelField = camelize($field);
+
+                    if (property_exists($entity, $camelField)) {
+                        $entity->{$camelField} = $value;
+                    }
                 }
 
                 $result[] = $entity;
@@ -116,5 +159,28 @@ class Model
         }
 
         return $result;
+    }
+
+    /**
+     * Load data from array
+     *
+     * @param array $data
+     *
+     * @return Model
+     */
+    public function fromArray(array $data): self
+    {
+        foreach ($data as $property => $value) {
+            if (property_exists($this, $property)) {
+                $this->{$property} = $value;
+            }
+        }
+
+        return $this;
+    }
+
+    public function toArray(): array
+    {
+        return (array) $this;
     }
 }

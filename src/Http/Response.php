@@ -14,20 +14,6 @@ use function GuzzleHttp\Psr7\stream_for;
 class Response
 {
     /**
-     * Response status code
-     *
-     * @var int
-     */
-    private $code = 200;
-
-    /**
-     * Response headers
-     *
-     * @var array
-     */
-    private $headers = [];
-
-    /**
      * PSR-7 response
      *
      * @var PsrResponse
@@ -36,7 +22,7 @@ class Response
 
     public function __construct()
     {
-        $this->psrResponse = new PsrResponse($this->code, $this->headers);
+        $this->psrResponse = new PsrResponse(200, []);
     }
 
     /**

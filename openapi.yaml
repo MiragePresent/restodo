@@ -1,0 +1,304 @@
+openapi: 3.0.0
+info:
+  title: Todo list API
+  description: Simple todo list API  with simple quthorization
+  contact:
+    name: Davyd Holovii
+    email: mirage.resent@gmail.com
+  version: 3.0.0
+paths:
+  /singup:
+    post:
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+      responses:
+        '200':
+          description: Success registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '412':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthFailure'
+  /singin:
+    post:
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+      responses:
+        '200':
+          description: Authorization succeeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '412':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthFailure'
+  /tasks:
+    get:
+      operationId: listTasks
+      security:
+        - xToken:
+            - all
+      parameters:
+        - name: limit
+          in: query
+          description: Number of tasks per page
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: Pagination page number
+          schema:
+            type: integer
+        - name: orderBy
+          in: query
+          description: Ordering column name
+          schema:
+            type: string
+            enum:
+              - title
+              - dueDate
+              - priority
+              - isDone
+        - name: orderType
+          in: query
+          description: Ordering type
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        '200':
+          description: A list of tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+                  hasNextPage:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpFailure'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpFailure'
+    post:
+      operationId: taskCreation
+      security:
+        - xToken:
+            - all
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskData'
+      responses:
+        '200':
+          description: Task created
+          content:
+            application/json: {}
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpFailure'
+        '412':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      priority:
+                        type: string
+                      dueDate:
+                        type: string
+  '/tasks/{taskId}/done':
+    patch:
+      operationId: finishTask
+      security:
+        - xToken:
+            - all
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpFailure'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpFailure'
+  '/tasks/{taskId}':
+    delete:
+      operationId: taskRemoving
+      security:
+        - xToken:
+            - all
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json: {}
+        '401':
+          description: Authorization error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpFailure'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpFailure'
+components:
+  schemas:
+    UserData:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 200
+        password:
+          type: string
+          minLength: 6
+          maxLength: 14
+    TaskData:
+      type: object
+      required:
+        - title
+        - dueDate
+        - priority
+      properties:
+        title:
+          type: string
+          minLength: 2
+          maxLength: 200
+        dueDate:
+          type: string
+          pattern: '/^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$/'
+        priority:
+          type: string
+          enum:
+            - LOW
+            - NORMAL
+            - HIGH
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+        dueDate:
+          type: string
+        priority:
+          type: string
+        isDone:
+          type: integer
+          readOnly: true
+          enum:
+            - 0
+            - 1
+    HttpFailure:
+      type: object
+      properties:
+        error:
+          type: string
+    AuthFailure:
+      type: object
+      properties:
+        errors:
+          type: object
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+  securitySchemes:
+    xToken:
+      type: apiKey
+      name: x-auth-token
+      in: header

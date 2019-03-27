@@ -44,6 +44,11 @@ class Router
             "method" => Request::METHOD_POST,
             "controller" => TaskController::class,
             "action" => "create",
+        ],[
+            "path" => "/tasks",
+            "method" => Request::METHOD_GET,
+            "controller" => TaskController::class,
+            "action" => "index",
         ], [
             "path" => "/tasks/{id}/done",
             "method" => Request::METHOD_PATCH,

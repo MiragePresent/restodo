@@ -13,8 +13,6 @@ use App\Model\User;
  */
 class Auth
 {
-    public const AUTH_TYPE = "Bearer";
-
     private $request;
 
     /**
@@ -31,21 +29,8 @@ class Auth
     {
         $this->request = $request;
 
-        if ($this->request->hasHeader("Authorization")) {
-            $header = current($this->request->getHeader("Authorization"));
-
-            if (strpos((string)$header, " ")) {
-                $parts = explode(" ", (string)$header);
-
-                if (count($parts) === 2) {
-                    $type = array_shift($parts);
-                    $token = array_shift($parts);
-
-                    if (static::AUTH_TYPE === $type) {
-                        $this->token = $token;
-                    }
-                }
-            }
+        if ($this->request->hasHeader("x-auth-token")) {
+            $this->token = current($this->request->getHeader("x-auth-token"));
         }
     }
 

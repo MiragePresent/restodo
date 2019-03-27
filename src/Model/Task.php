@@ -47,7 +47,7 @@ class Task extends Model
      */
     public $priority;
 
-    public $isDone;
+    public $isDone = 0;
 
     public function setPriority(string $priorityName): self
     {

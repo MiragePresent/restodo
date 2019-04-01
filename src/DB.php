@@ -46,12 +46,7 @@ class DB
     public static function getInstance(): DB
     {
         if (!static::$db) {
-            static::$db = new static(
-                env("DB_USER", 'root'),
-                env("DB_PASSWORD", ""),
-                env("DB_NAME"),
-                env("DB_HOST", "localhost")
-            );
+            static::$db = new static(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
         }
 
         return static::$db;

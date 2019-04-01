@@ -3,8 +3,6 @@
     "description": "REST API for todo list",
     "type": "project",
     "require": {
-        "firebase/php-jwt": "^5.0",
-        "vlucas/phpdotenv": "^3.3",
         "guzzlehttp/guzzle": "^6.3"
     },
     "license": "MIT",

@@ -2,9 +2,6 @@
     "name": "mireagepresent/restodo",
     "description": "REST API for todo list",
     "type": "project",
-    "require": {
-        "guzzlehttp/guzzle": "^6.3"
-    },
     "license": "MIT",
     "authors": [
         {

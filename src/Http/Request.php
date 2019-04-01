@@ -2,14 +2,13 @@
 
 namespace App\Http;
 
-use GuzzleHttp\Psr7\Request as PsrRequest;
 /**
  * Class Request
  *
  * @author Davyd Holovii <mirage.present@gmail.com>
  * @since  25.03.2019
  */
-class Request extends PsrRequest
+class Request
 {
     /**
      * Http method OPTIONS
@@ -47,6 +46,26 @@ class Request extends PsrRequest
     public const METHOD_DELETE = "DELETE";
 
     /**
+     * @var string
+     */
+    private $method;
+
+    /**
+     * @var string
+     */
+    private $uri;
+
+    /**
+     * @var array
+     */
+    private $headers;
+
+    /**
+     * @var string
+     */
+    private $content;
+
+    /**
      * Authentication handler
      *
      * @var Auth
@@ -70,7 +89,16 @@ class Request extends PsrRequest
 
     public function __construct(string $method, $uri, array $headers = [], $body = null, string $version = '1.1')
     {
-        parent::__construct($method, $uri, $headers, $body, $version);
+        $parsed = parse_url($uri);
+
+        $this->method = $method;
+        $this->uri = $parsed["path"] ?? "";
+
+        foreach ($headers as $header => $value) {
+            $this->headers[strtolower($header)] = $value;
+        }
+
+        $this->content = $body;
 
         $this->auth = new Auth($this);
     }
@@ -105,6 +133,35 @@ class Request extends PsrRequest
         return $this->routeSettings;
     }
 
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
+
+    public function hasHeader(string $name): bool
+    {
+        $name = strtolower($name);
+
+        return isset($this->headers[$name]);
+    }
+
+    public function getHeader(string $name): ?string
+    {
+        $name = strtolower($name);
+
+        return $this->headers[$name] ?? null;
+    }
+
+    public function getUri(): string
+    {
+        return $this->uri;
+    }
+
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
     /**
      * Whether is JSON request
      *
@@ -112,7 +169,7 @@ class Request extends PsrRequest
      */
     public function isJson(): bool
     {
-        $contentType = current($this->getHeader("Content-Type"));
+        $contentType = $this->getHeader("Content-Type");
 
         return $contentType && false !== strpos($contentType, 'json');
     }
@@ -128,7 +185,7 @@ class Request extends PsrRequest
     {
         if ($this->isJson()) {
             if (!$this->parsedJson) {
-                $this->parsedJson = json_decode($this->getBody()->getContents(), true);
+                $this->parsedJson = json_decode($this->getContent(), true);
             }
 
             return $this->parsedJson[$name] ?? null;

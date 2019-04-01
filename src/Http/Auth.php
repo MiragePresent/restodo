@@ -30,7 +30,7 @@ class Auth
         $this->request = $request;
 
         if ($this->request->hasHeader("x-auth-token")) {
-            $this->token = current($this->request->getHeader("x-auth-token"));
+            $this->token = $this->request->getHeader("x-auth-token");
         }
     }
 

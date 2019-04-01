@@ -2,9 +2,6 @@
 
 namespace App\Http;
 
-use GuzzleHttp\Psr7\Response as PsrResponse;
-use function GuzzleHttp\Psr7\stream_for;
-
 /**
  * Class Response
  *
@@ -13,16 +10,27 @@ use function GuzzleHttp\Psr7\stream_for;
  */
 class Response
 {
+
     /**
-     * PSR-7 response
-     *
-     * @var PsrResponse
+     * @var int
      */
-    private $psrResponse;
+    private $statusCode;
+
+    /**
+     * @var array
+     */
+    private $headers;
+
+    /**
+     * @var string
+     */
+    private $body;
+
 
     public function __construct()
     {
-        $this->psrResponse = new PsrResponse(200, []);
+        $this->statusCode = 200;
+        $this->headers = [];
     }
 
     /**
@@ -34,7 +42,7 @@ class Response
      */
     public function setStatusCode(int $code): self
     {
-        $this->psrResponse = $this->psrResponse->withStatus($code);
+        $this->statusCode = $code;
 
         return $this;
     }
@@ -48,9 +56,7 @@ class Response
      */
     public function addHeaders(array $headers): self
     {
-        foreach ($headers as $header => $value) {
-            $this->psrResponse = $this->psrResponse->withAddedHeader($header, $value);
-        }
+        $this->headers = array_merge($this->headers, $headers);
 
         return $this;
     }
@@ -64,9 +70,29 @@ class Response
      */
     public function setBody(string $body): self
     {
-        $this->psrResponse = $this->psrResponse->withBody(stream_for($body));
+        $this->body = $body;
 
         return $this;
+    }
+
+    /**
+     * Returns response header
+     *
+     * @return int
+     */
+    public function getStatusCode(): int
+    {
+        return $this->statusCode;
+    }
+
+    /**
+     * Returns response headers
+     *
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 
     /**
@@ -74,27 +100,15 @@ class Response
      */
     public function send(): void
     {
-        $http_line = sprintf('HTTP/%s %s %s',
-            $this->psrResponse->getProtocolVersion(),
-            $this->psrResponse->getStatusCode(),
-            $this->psrResponse->getReasonPhrase()
-        );
+        $http_line = sprintf('HTTP/1.1 %s', $this->getStatusCode());
 
-        header($http_line, true, $this->psrResponse->getStatusCode());
+        header($http_line, true, $this->getStatusCode());
 
-        foreach ($this->psrResponse->getHeaders() as $name => $values) {
-            foreach ($values as $value) {
-                header("$name: $value", false);
-            }
+        foreach ($this->getHeaders() as $name => $value) {
+            header("$name: $value", false);
         }
 
-        $stream = $this->psrResponse->getBody();
-
-        if ($stream->isSeekable()) {
-            $stream->rewind();
-        }
-        while (!$stream->eof()) {
-            echo $stream->read(1024 * 8);
-        }
+        echo $this->body;
+        exit;
     }
 }

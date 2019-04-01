@@ -147,7 +147,7 @@ class Router
     protected function detectRoute(): array
     {
         $detected = null;
-        $requestItems = explode("/", $this->request->getUri()->getPath());
+        $requestItems = explode("/", $this->request->getUri());
 
         foreach ($this->routes as $route) {
             if ($route["method"] !== $this->request->getMethod()) {

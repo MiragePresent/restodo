@@ -148,7 +148,7 @@ class Router
     protected function detectRoute(): array
     {
         $detected = null;
-        $requestItems = explode("/", $this->request->getUri());
+        $requestItems = $this->trimItems(explode("/", $this->request->getUri()));
 
         foreach ($this->routes as $route) {
             if ($route["method"] !== $this->request->getMethod()) {
@@ -157,7 +157,7 @@ class Router
 
             $attributes = [];
 
-            $routeItems = explode("/", $route["path"]);
+            $routeItems = $this->trimItems(explode("/", $route["path"]));
 
             if (count($requestItems) !== count($routeItems)) {
                 continue;
@@ -181,5 +181,31 @@ class Router
         }
 
         return $detected;
+    }
+
+    /**
+     * Removes last and first array's items if they are empty
+     *
+     * @param array $items
+     *
+     * @return array
+     */
+    private function trimItems(array $items): array
+    {
+        reset($items);
+        $first = key($items);
+
+        if (null !== $first && !$items[$first]) {
+            unset($items[$first]);
+        }
+
+        end($items);
+        $last = key($items);
+
+        if (null !== $last && !$items[$last]) {
+            unset($items[$last]);
+        }
+
+        return array_values($items);
     }
 }

@@ -73,21 +73,22 @@ class Router
      * Router constructor.
      *
      * @throws BadRequestException
-     * @throws NotFoundException
      */
     public function __construct()
     {
         $this->request = $this->createRequest();
-        $this->request->setRouteSettings($this->detectRoute());
     }
 
     /**
      * Process request
      *
      * @return Response
+     * @throws NotFoundException
      */
     public function handle(): Response
     {
+        $this->request->setRouteSettings($this->detectRoute());
+
         $controller = $this->getController();
         $attributes = $this->request->getRouteSettings('attributes');
         $action = $this->request->getRouteSettings('action');
